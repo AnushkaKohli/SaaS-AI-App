@@ -37,4 +37,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 # Steps
 
-1. shadcn ui
+1. Shadcn ui
+2. Clerk authentication
