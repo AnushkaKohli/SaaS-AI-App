@@ -1,17 +1,29 @@
 "use client"; //as useForm is a hook
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "@/lib/utils";
+import Markdown from "react-markdown"
 import { MessageSquare } from "lucide-react";
+// import ChatCompletionRequestMessage from "openai";
 
 import { conversationSchema } from "./constants";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Empty } from "@/components/Empty";
+import { Loader } from "@/components/Loader";
+import { UserAvatar } from "@/components/UserAvatar";
+import { BotAvatar } from "@/components/BotAvatar";
 
 const ConversationPage = () => {
+    const router = useRouter();
+    const [messages, setMessages] = useState<string[]>([]);
     const form = useForm<z.infer<typeof conversationSchema>>({
         // zodResolver is used to handle validation based on the zod schema
         resolver: zodResolver(conversationSchema),
@@ -23,7 +35,45 @@ const ConversationPage = () => {
     const isLoading = form.formState.isSubmitting;
 
     const onSubmit = async (values: z.infer<typeof conversationSchema>) => {
-        console.log(values);
+        try {
+            // message written by the user in the input form
+            // const userMessage = {
+            //     role: "user",
+            //     content: values.prompt,
+            // };
+            // array of all the existing messages and adding the user message to it
+            // const newMessages = [...messages, userMessage];
+            // const response = await axios.post("/api/conversation", {
+            //     messages: newMessages,
+            // });
+            // setMessages((current) => [...current, userMessage, response.data]);
+            // console.log("values: ", values)
+            const prompt = values.prompt;
+            // console.log("prompt: ", prompt)
+            const newMessages = [...messages, prompt];
+            // console.log("newMessages: ", newMessages)
+            const response = await axios.post("/api/conversation", {
+                messages: newMessages,
+            });
+            // console.log("response", response)
+
+            if (response.data && response.data.response) {
+                // Update prompts with generated response
+                // response.data.response
+                setMessages((current) => [...current, prompt, response.data.response]);
+                console.log("messages after set prompts", messages)
+            } else {
+                console.error("Error generating response:", response);
+            }
+
+
+            // To clear the form after submission
+            form.reset();
+        } catch (error: any) {
+            console.log("Error", error.message);
+        } finally {
+            router.refresh();
+        }
     }
 
     // const test = () => {
@@ -72,7 +122,30 @@ const ConversationPage = () => {
                     </Form>
                 </div>
                 <div className="space-y-4 mt-4">
-                    Messages Content
+                    {isLoading && (
+                        <div className="p-8 rounded-lg w-full flex items-center justify-center bg-muted">
+                            <Loader />
+                        </div>
+                    )}
+                    {messages.length === 0 && !isLoading && (
+                        <Empty label="No conversation started." />
+                    )}
+                    <div className="flex flex-col-reverse gap-y-4">
+                        {messages.map((message, index) => (
+                            <div
+                                key={index}
+                                className={cn(
+                                    "p-8 w-full flex items-start gap-x-8 rounded-lg",
+                                    index % 2 === 0 ? "bg-white border border-black/10" : "bg-muted",
+                                )}
+                            >
+                                {index % 2 === 0 ? <UserAvatar /> : <BotAvatar />}
+                                <Markdown className="text-sm">
+                                    {message}
+                                </Markdown>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
