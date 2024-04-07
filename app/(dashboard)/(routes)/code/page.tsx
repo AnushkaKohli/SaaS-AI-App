@@ -1,4 +1,4 @@
-"use client"; //as useForm is a hook
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,10 +8,9 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import Markdown from "react-markdown"
-import { MessageSquare } from "lucide-react";
-// import ChatCompletionRequestMessage from "openai";
+import { Code } from "lucide-react";
 
-import { conversationSchema } from "./constants";
+import { codeSchema } from "./constants";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -21,12 +20,11 @@ import { Loader } from "@/components/Loader";
 import { UserAvatar } from "@/components/UserAvatar";
 import { BotAvatar } from "@/components/BotAvatar";
 
-const ConversationPage = () => {
+const CodePage = () => {
     const router = useRouter();
     const [messages, setMessages] = useState<string[]>([]);
-    const form = useForm<z.infer<typeof conversationSchema>>({
-        // zodResolver is used to handle validation based on the zod schema
-        resolver: zodResolver(conversationSchema),
+    const form = useForm<z.infer<typeof codeSchema>>({
+        resolver: zodResolver(codeSchema),
         defaultValues: {
             prompt: "",
         },
@@ -34,40 +32,19 @@ const ConversationPage = () => {
 
     const isLoading = form.formState.isSubmitting;
 
-    const onSubmit = async (values: z.infer<typeof conversationSchema>) => {
+    const onSubmit = async (values: z.infer<typeof codeSchema>) => {
         try {
-            // message written by the user in the input form
-            // const userMessage = {
-            //     role: "user",
-            //     content: values.prompt,
-            // };
-            // array of all the existing messages and adding the user message to it
-            // const newMessages = [...messages, userMessage];
-            // const response = await axios.post("/api/conversation", {
-            //     messages: newMessages,
-            // });
-            // setMessages((current) => [...current, userMessage, response.data]);
-            // console.log("values: ", values)
             const prompt = values.prompt;
-            // console.log("prompt: ", prompt)
             const newMessages = [...messages, prompt];
-            // console.log("newMessages: ", newMessages)
-            const response = await axios.post("/api/conversation", {
+            const response = await axios.post("/api/code", {
                 messages: newMessages,
             });
-            // console.log("response", response)
 
             if (response.data && response.data.response) {
-                // Update prompts with generated response
-                // response.data.response
                 setMessages((current) => [...current, prompt, response.data.response]);
-                // console.log("messages after set prompts", messages)
             } else {
                 console.error("Error generating response:", response);
             }
-
-
-            // To clear the form after submission
             form.reset();
         } catch (error: any) {
             console.log("Error", error.message);
@@ -75,31 +52,23 @@ const ConversationPage = () => {
             router.refresh();
         }
     }
-
-    // const test = () => {
-    //     console.log("form", form)
-    //     console.log("Hello");
-    // }
     return (
         <div>
             <Heading
-                title="Conversation"
-                description="Start a conversation with Sage."
-                icon={MessageSquare}
-                iconColor="text-violet-500"
-                bgColor="bg-violet-500/10"
+                title="Code Generation"
+                description="Generate code snippets with Sage."
+                icon={Code}
+                iconColor="text-green-700"
+                bgColor="bg-green-700/10"
             />
-            {/* <Button onClick={test} className="px-3 py-2 border-black border-2 rounded-md">Click me</Button> */}
             <div className="px-4 lg:px-8">
                 <div>
-                    {/* Passing all the functions the `form` constant has, which uses the react-hook-form */}
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit)}
                             className="rounded-lg border w-full p-4 px-3 md:px-6 focus-within:shadow-sm grid grid-cols-12 gap-2"
                         >
                             <FormField
-                                // name controls the "prompt" field in the form
                                 name="prompt"
                                 render={({ field }) => (
                                     <FormItem className="col-span-12 lg:col-span-10">
@@ -107,8 +76,7 @@ const ConversationPage = () => {
                                             <Input
                                                 className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                                 disabled={isLoading}
-                                                placeholder="How many ants would it take to lift an elephant?"
-                                                // the field object typically contains properties such as onChange, onBlur, name, ref, and value from react-hook-form. These properties are essential for the form to correctly manage the input's state and validation. By spreading the field object into the Input component, you ensure that all necessary props are passed to the input like onChange, onBlur etc, allowing React Hook Form to register the input field, track its value, and handle validation and submission correctly.
+                                                placeholder="Create a button using Tailwind CSS"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -140,8 +108,19 @@ const ConversationPage = () => {
                                 )}
                             >
                                 {index % 2 === 0 ? <UserAvatar /> : <BotAvatar />}
-                                <Markdown className="text-sm">
-                                    {message}
+                                <Markdown
+                                    className="text-sm overflow-hidden leading-7"
+                                    components={{
+                                        pre: ({ node, ...props }) =>
+                                        (<div className="overflow-auto w-full my-2 bg-black/10 p-4 rounded-lg">
+                                            <pre {...props} />
+                                        </div>),
+                                        code: ({ node, ...props }) => (
+                                            <code className="bg-black/10 rounded-lg p-2" {...props} />
+                                        )
+                                    }}
+                                >
+                                    {message || "No response"}
                                 </Markdown>
                             </div>
                         ))}
@@ -152,4 +131,4 @@ const ConversationPage = () => {
     );
 }
 
-export default ConversationPage;
+export default CodePage;
