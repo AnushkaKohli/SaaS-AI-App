@@ -42,8 +42,7 @@ export async function POST(req: Request) {
     // });
 
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const prompt = messages[messages.length - 1]; // Combine prompts into a single string
-
+    const prompt = messages[messages.length - 1]; // Find the last message to use as prompt
     const result = await model.generateContent(prompt, model);
     const responseText = await result.response.text();
     // console.log("Messages: ", messages);
