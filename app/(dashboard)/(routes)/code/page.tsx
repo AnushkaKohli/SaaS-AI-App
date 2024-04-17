@@ -11,6 +11,7 @@ import Markdown from "react-markdown"
 import { Code } from "lucide-react";
 
 import { codeSchema } from "./constants";
+import { useProModal } from "@/hooks/useProModal";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { BotAvatar } from "@/components/BotAvatar";
 
 const CodePage = () => {
+    const proModal = useProModal();
     const router = useRouter();
     const [messages, setMessages] = useState<string[]>([]);
     const form = useForm<z.infer<typeof codeSchema>>({
@@ -47,6 +49,9 @@ const CodePage = () => {
             }
             form.reset();
         } catch (error: any) {
+            if (error?.response?.status === 403) {
+                proModal.onOpen();
+            }
             console.log("Error", error.message);
         } finally {
             router.refresh();

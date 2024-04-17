@@ -12,6 +12,7 @@ import { MessageSquare } from "lucide-react";
 // import ChatCompletionRequestMessage from "openai";
 
 import { conversationSchema } from "./constants";
+import { useProModal } from "@/hooks/useProModal";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { BotAvatar } from "@/components/BotAvatar";
 
 const ConversationPage = () => {
+    const proModal = useProModal();
     const router = useRouter();
     const [messages, setMessages] = useState<string[]>([]);
     const form = useForm<z.infer<typeof conversationSchema>>({
@@ -52,6 +54,9 @@ const ConversationPage = () => {
             // To clear the form after submission
             form.reset();
         } catch (error: any) {
+            if (error?.response?.status === 403) {
+                proModal.onOpen();
+            }
             console.log("Error", error.message);
         } finally {
             // This helps in rehydrating all the server components and fetching the latest data from the database

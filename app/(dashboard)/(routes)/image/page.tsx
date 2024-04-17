@@ -6,21 +6,17 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
-import Markdown from "react-markdown"
 import { Download, ImageIcon } from "lucide-react";
 import Image from "next/image";
 
 import { amountOptions, imageSchema, resolutionOptions } from "./constants";
+import { useProModal } from "@/hooks/useProModal";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/Empty";
 import { Loader } from "@/components/Loader";
-import { UserAvatar } from "@/components/UserAvatar";
-import { BotAvatar } from "@/components/BotAvatar";
-import { useProModal } from "@/hooks/useProModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardFooter } from "@/components/ui/card";
 
@@ -43,19 +39,11 @@ const ImagePage = () => {
         try {
             // Reset all the photos every time we click submit
             setPhotos([]);
-            // const prompt = values.prompt;
-            // const newMessages = [...messages, prompt];
             console.log("values", values)
             const response = await axios.post("/api/image", values);
             console.log("response", response.data)
             const urls = response.data.map((image: { url: string }) => image.url);
             setPhotos(urls);
-
-            // if (response.data && response.data.response) {
-            //     setMessages((current) => [...current, prompt, response.data.response]);
-            // } else {
-            //     console.error("Error generating response:", response);
-            // }
 
             form.reset();
         } catch (error: any) {
@@ -68,11 +56,6 @@ const ImagePage = () => {
             router.refresh();
         }
     }
-
-    // const test = () => {
-    //     console.log("form", form)
-    //     console.log("Hello");
-    // }
     return (
         <div>
             <Heading
@@ -82,7 +65,7 @@ const ImagePage = () => {
                 iconColor="text-pink-700"
                 bgColor="bg-pink-700/10"
             />
-            {/* <Button onClick={test} className="px-3 py-2 border-black border-2 rounded-md">Click me</Button> */}
+
             <div className="px-4 lg:px-8">
                 <div>
                     <Form {...form}>
