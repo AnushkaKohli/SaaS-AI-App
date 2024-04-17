@@ -36,50 +36,29 @@ const ConversationPage = () => {
 
     const onSubmit = async (values: z.infer<typeof conversationSchema>) => {
         try {
-            // message written by the user in the input form
-            // const userMessage = {
-            //     role: "user",
-            //     content: values.prompt,
-            // };
-            // array of all the existing messages and adding the user message to it
-            // const newMessages = [...messages, userMessage];
-            // const response = await axios.post("/api/conversation", {
-            //     messages: newMessages,
-            // });
-            // setMessages((current) => [...current, userMessage, response.data]);
-            // console.log("values: ", values)
             const prompt = values.prompt;
-            // console.log("prompt: ", prompt)
             const newMessages = [...messages, prompt];
-            // console.log("newMessages: ", newMessages)
             const response = await axios.post("/api/conversation", {
                 messages: newMessages,
             });
-            // console.log("response", response)
 
             if (response.data && response.data.response) {
                 // Update prompts with generated response
-                // response.data.response
                 setMessages((current) => [...current, prompt, response.data.response]);
-                // console.log("messages after set prompts", messages)
             } else {
                 console.error("Error generating response:", response);
             }
-
 
             // To clear the form after submission
             form.reset();
         } catch (error: any) {
             console.log("Error", error.message);
         } finally {
+            // This helps in rehydrating all the server components and fetching the latest data from the database
             router.refresh();
         }
     }
 
-    // const test = () => {
-    //     console.log("form", form)
-    //     console.log("Hello");
-    // }
     return (
         <div>
             <Heading
@@ -89,7 +68,6 @@ const ConversationPage = () => {
                 iconColor="text-violet-500"
                 bgColor="bg-violet-500/10"
             />
-            {/* <Button onClick={test} className="px-3 py-2 border-black border-2 rounded-md">Click me</Button> */}
             <div className="px-4 lg:px-8">
                 <div>
                     {/* Passing all the functions the `form` constant has, which uses the react-hook-form */}
