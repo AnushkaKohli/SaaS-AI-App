@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import Replicate from "replicate";
 
+import { checkApiLimit, increaseApiLimit } from "@/lib/apiLimit";
+
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
@@ -20,6 +22,13 @@ export async function POST(req: Request) {
       return new NextResponse("Prompt is required", { status: 400 });
     }
 
+    const freeTrial = await checkApiLimit();
+    if (!freeTrial) {
+      return new NextResponse("You have reached the limit of free requests", {
+        status: 403,
+      });
+    }
+
     const input = {
       fps: 24,
       width: 1024,
@@ -35,6 +44,8 @@ export async function POST(req: Request) {
       { input }
     );
     console.log(response);
+
+    await increaseApiLimit();
 
     return new NextResponse(JSON.stringify({ response: response }), {
       status: 200,

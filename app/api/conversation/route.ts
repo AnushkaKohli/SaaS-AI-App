@@ -1,13 +1,8 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-// import OpenAI from "openai";
-
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { generateContent } = require("@google/generative-ai");
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+import { checkApiLimit, increaseApiLimit } from "@/lib/apiLimit";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -21,11 +16,6 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // if (!openai.apiKey) {
-    //   return new NextResponse("OpenAI API key not configured.", {
-    //     status: 500,
-    //   });
-    // }
     if (!genAI) {
       return new NextResponse("Gemini API key not configured.", {
         status: 500,
@@ -36,20 +26,19 @@ export async function POST(req: Request) {
       return new NextResponse("Messages are required", { status: 400 });
     }
 
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages,
-    // });
+    const freeTrial = await checkApiLimit();
+    if (!freeTrial) {
+      return new NextResponse("You have reached the limit of free requests", {
+        status: 403,
+      });
+    }
 
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const prompt = messages[messages.length - 1]; // Find the last message to use as prompt
     const result = await model.generateContent(prompt, model);
     const responseText = await result.response.text();
-    // console.log("Messages: ", messages);
-    // console.log("Prompt: ", prompt);
-    // console.log("Result: ", result);
-    // console.log("Response text: ", responseText);
-    // const result = await model.generate(messages[messages.length - 1].content);
+
+    await increaseApiLimit();
 
     return new NextResponse(JSON.stringify({ response: responseText }), {
       status: 200,
