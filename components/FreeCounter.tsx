@@ -32,7 +32,6 @@ const FreeCounter = ({
         return null;
     }
 
-
     return (
         <div className="px-3">
             <Card className="bg-white/10 border-0">

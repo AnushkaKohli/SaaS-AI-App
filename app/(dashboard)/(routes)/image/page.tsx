@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, ImageIcon } from "lucide-react";
@@ -50,7 +51,7 @@ const ImagePage = () => {
             if (error?.response?.status === 403) {
                 proModal.onOpen();
             } else {
-                // toast.error("Something went wrong.");
+                toast.error("Error generating response");
             }
         } finally {
             router.refresh();

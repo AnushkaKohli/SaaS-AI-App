@@ -6,11 +6,12 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
 import Markdown from "react-markdown"
 import { Code } from "lucide-react";
 
 import { codeSchema } from "./constants";
+import { cn } from "@/lib/utils";
 import { useProModal } from "@/hooks/useProModal";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -51,6 +52,8 @@ const CodePage = () => {
         } catch (error: any) {
             if (error?.response?.status === 403) {
                 proModal.onOpen();
+            } else {
+                toast.error("Error generating response");
             }
             console.log("Error", error.message);
         } finally {

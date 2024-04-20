@@ -40,3 +40,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 1. Shadcn ui
 2. Clerk authentication
 3. Open AI
+
+## Steps for stripe integration
+
+1. Add the stripe secret key to your env
+
+2. ```sh
+    npm i stripe
+    ```
+
+3. Download striple cli
+
+4. Visit this [website](https://dashboard.stripe.com/test/webhooks/create?endpoint_location=local)" for further steps

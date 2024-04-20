@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 import { checkApiLimit, increaseApiLimit } from "@/lib/apiLimit";
+import { checkSubscription } from "@/lib/subsciption";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -35,7 +36,8 @@ export async function POST(req: Request) {
     }
 
     const freeTrial = await checkApiLimit();
-    if (!freeTrial) {
+    const isPro = await checkSubscription();
+    if (!freeTrial && !isPro) {
       return new NextResponse("You have reached the limit of free requests", {
         status: 403,
       });
@@ -46,7 +48,9 @@ export async function POST(req: Request) {
     const response = await model.generateContent(promptForImage, model);
     const responseText = await response.response.text();
 
-    await increaseApiLimit();
+    if (!isPro) {
+      await increaseApiLimit();
+    }
 
     return new NextResponse(JSON.stringify({ responseText }), {
       status: 200,

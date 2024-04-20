@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
 import Markdown from "react-markdown"
 import { MessageSquare } from "lucide-react";
 // import ChatCompletionRequestMessage from "openai";
 
 import { conversationSchema } from "./constants";
+import { cn } from "@/lib/utils";
 import { useProModal } from "@/hooks/useProModal";
 import Heading from "@/components/Heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -56,6 +57,8 @@ const ConversationPage = () => {
         } catch (error: any) {
             if (error?.response?.status === 403) {
                 proModal.onOpen();
+            } else {
+                toast.error("Error generating response");
             }
             console.log("Error", error.message);
         } finally {
