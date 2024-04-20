@@ -53,8 +53,6 @@ export async function POST(req: Request) {
 
   // If the user has successfully completed the payment or has just upgraded their subscription
   if ((event.type = "invoice.payment_succeeded")) {
-    console.log("Session: ", session);
-    console.log("Session.subscription: ", session.subscription);
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription as string
     );
